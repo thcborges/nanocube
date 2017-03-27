@@ -68,7 +68,7 @@ struct Server {
 
     Server() = default;
 
-    void init(int mongoose_threads, std::string pemfile);
+    void init(int mongoose_threads);
     void run();
     
     void stop();

@@ -15,14 +15,13 @@ AC_PROG_LIBTOOL
 
 # Checks for programs.
 host_os=`uname`
-#if test "$host_os" = "Darwin"; then
-#   AS_VAR_SET([cpp_compiler],[clang++])
-   #CXX="clang++ "
-   #CXXFLAGS+=" -stdlib=libc++ -mmacosx-version-min=10.7"
-   #CFLAGS+=" -mmacosx-version-min=10.7"
-#else
-#   AS_VAR_SET([cpp_compiler],[])
-#fi
+if test "$host_os" = "Darwin"; then
+   AS_VAR_SET([cpp_compiler],[clang++])
+   CXX="clang++ "
+   CXXFLAGS+=" -stdlib=libc++ -mmacosx-version-min=10.7"
+else
+   AS_VAR_SET([cpp_compiler],[])
+fi
 
 # echo "----------------> $CC"
 
@@ -39,16 +38,16 @@ AX_CXX_COMPILE_STDCXX_11(noext)
 # check zlib
 AX_CHECK_ZLIB
 
-# Check OpenSSL
-AX_CHECK_OPENSSL([CFLAGS+=" -DNS_ENABLE_SSL"])
-
 #check boost
 BOOST_REQUIRE([1.48])
 BOOST_THREADS
 BOOST_SYSTEM
 BOOST_ASIO
 
-AC_CHECK_CURL(7)
+#BOOST_REQUIRE([1.48])
+#BOOST_THREADS
+#BOOST_SERIALIZATION
+#BOOST_MPI
 
 TS_CHECK_TCMALLOC
 

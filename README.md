@@ -56,34 +56,6 @@ sudo apt-get install automake
 sudo apt-get install libtool
 sudo apt-get install zlib1g-dev
 sudo apt-get install libboost-all-dev
-sudo apt-get install libcurl4-openssl-dev
-```
-**The support for Ubuntu 16.04 is currently being tested (due to changes in gcc 5), please try it out with the `master` version.**
-
-
-#### Linux (CentOS 6)
-
-Install updated tools from [Software Collections](https://www.softwarecollections.org/en/)
-
-```
-sudo yum install https://www.softwarecollections.org/en/scls/rhscl/devtoolset-3/epel-6-x86_64/download/rhscl-devtoolset-3-epel-6-x86_64.noarch.rpm
-sudo yum install https://www.softwarecollections.org/en/scls/denisarnaud/boost157/epel-6-x86_64/download/denisarnaud-boost157-epel-6-x86_64.noarch.rpm
-sudo yum install https://www.softwarecollections.org/en/scls/praiskup/autotools/epel-6-x86_64/download/praiskup-autotools-epel-6-x86_64.noarch.rpm
-sudo yum updateinfo
-
-sudo yum install curl-devel
-sudo yum install zlib-devel
-sudo yum install autotools-latest
-sudo yum install boost157-devel
-sudo yum install devtoolset-3-gcc-c++
-```
-
-Then switch to the software collection environment for the new tools and libraries
-
-```
-scl enable devtoolset-3 autotools-latest bash
-export BOOST_ROOT=/usr/include/boost157
-export LDFLAGS=-L/usr/lib64/boost157
 ```
 
 #### Mac OS X (10.9 and 10.10)
@@ -115,12 +87,12 @@ export BOOST_ROOT=${PWD}/homebrew
 
 ## Compiling the latest release
 
-To compile the nanocubes toolkit, run the following commands on your linux/mac system.  You can `https://github.com/laurolins/nanocube.git` or replace `3.2.1` with other valid release numbers, e.g. 3.2, 3.1, 3.0.1, etc. but please follow the instructions in the README.md file for the older releases as they will differ slightly.
+To compile the nanocubes toolkit, run the following commands on your linux/mac system.  You can replace `3.2` with other valid release numbers, e.g. 3.0.1, 3.0, 2.1.3, 2.1, 2.0, but in those cases please follow the instructions in the README.md file for those releases as they will differ slightly.
 
 ```
-wget https://github.com/laurolins/nanocube/archive/3.2.1.zip
-unzip 3.2.1.zip
-cd nanocube-3.2.1
+wget https://github.com/laurolins/nanocube/archive/3.2.zip
+unzip 3.2.zip
+cd nanocube-3.2
 export NANOCUBE_SRC=`pwd`
 ./bootstrap
 mkdir build
@@ -131,7 +103,7 @@ make install
 cd ..
 ```
 
-After these commands you should have directory `nanocube-3.2.1/bin` with the nanocubes toolkit inside. To make these tools more easily accessible in your account, add the `nanocube-3.2.1/bin` directory to your PATH environment variable.
+After these commands you should have directory `nanocube-3.2/bin` with the nanocubes toolkit inside. To make these tools more easily accessible in your account, add the `nanocube-3.2/bin` directory to your PATH environment variable.
 
 ```
 export NANOCUBE_BIN=$NANOCUBE_SRC/bin
@@ -160,7 +132,7 @@ you are using tcmalloc).
 
 ##### Output
 ```
-VERSION: 3.2.1
+VERSION: 3.2
 query-port: 29512
 (stdin     ) count:      10000 mem. res:          7MB. time(s):          0
 (stdin     ) count:      20000 mem. res:         12MB. time(s):          0
@@ -323,12 +295,9 @@ If you believe there may be a problem with the crime nanocube, try
 running 'nctest.sh' in the `test` subdirectory.  It will make some
 queries of the nanocube (change the script if you are not using port
 29512) and compare the results to known results that we gathered
-ourselves.  If the results match, it will
+ourselves (for both Ubuntu 14.04 and MacOS 10.10).  If the results match, it will
 report 'SUCCESS'.  In the case of FAILURE, it may still be a simple discrepancy
-so you should look at the output to see if there is a simple explanation.  Note that we
-are sorting the results of multiple queries and checking that the values returned are
-identical, so it is highly unlikely that there is a problem if the sorted results match
-the expected results.
+so you should look at the output to see if the results may simply be sorted differently.
 
 <!--
  and produces `out.txt`.
@@ -517,7 +486,7 @@ For Mac OS (Static libraries only)
 
 You must then re-run the configure script, indicating support for tcmalloc.
 
-    ../configure --prefix=$NANOCUBE_SRC LIBS=${PWD}/homebrew/lib/libtcmalloc_minimal.a
+    ../configure --prefix=$NANOCUBES_SRC LIBS=${PWD}/homebrew/lib/libtcmalloc_minimal.a
     make clean
     make -j
     make install    

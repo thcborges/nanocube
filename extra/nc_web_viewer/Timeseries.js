@@ -1,31 +1,7 @@
 /*global $,d3 */
 
 function Timeseries(name, margin){
-    var id = '#'+ name.replace(/\./g,'\\.');
-
-    //Add CSS to the div
-    d3.select(id).style({
-        "overflow-y":"auto",
-        "overflow-x":"hidden"
-    });
-
-    var widget = this;
-    //Make draggable and resizable
-    d3.select(id).attr("class","resize-drag");
-    
-    d3.select(id).on("divresize",function(){ widget.redraw(); });
-
-    //Collapse on dbl click
-    d3.select(id).on('dblclick',function(d){
-        var currentheight = d3.select(id).style("height");
-        if ( currentheight != "20px"){
-            widget.restoreHeight =currentheight ;
-            d3.select(id).style('height','20px');
-        }
-        else{
-            d3.select(id).style("height",widget.restoreHeight);
-        }
-    });
+    var id = '#'+name;
 
     this.data = {};
     this.brush_callback = null;
@@ -35,21 +11,11 @@ function Timeseries(name, margin){
         margin = {top: 30, right: 10, bottom: 30, left: 50};
     }
 
-    var width = $(id).width() - margin.left - margin.right-5;
-    var height = $(id).height()- margin.top - margin.bottom-5;
+    var width = $(id).width() - margin.left - margin.right;
+    var height = $(id).height()- margin.top - margin.bottom;
 
-    var chart = this;
-    d3.select(id).on('dblclick',function(d){
-            if ($(this).height() != 24){
-                chart.restoreHeight = $(this).height();
-                $(this).height(24);
-            }
-            else{
-                $(this).height(chart.restoreHeight);
-            }
-    });
     
-    this.x = d3.time.scale.utc()
+    this.x = d3.time.scale()
         .range([0, width]);
     
     this.y = d3.scale.linear()
@@ -61,7 +27,7 @@ function Timeseries(name, margin){
     this.yAxis = d3.svg.axis()
         .scale(this.y)
         .orient("left")
-        .ticks(4,',s');
+        .ticks(3,',s');
 
     var that = this;
 
@@ -197,9 +163,6 @@ Timeseries.prototype.updateRanges=function(){
     //set domain
     var xext = d3.extent(data, function(d) { return d.date; });
     var yext = d3.extent(data, function(d) { return d.value; });
-    if (yext[0] == yext[1]){
-	yext[0] -= Math.abs(yext[0])*0.1;
-    }
 
     this.y.domain(yext);
     var xdom = this.x.domain();
@@ -237,9 +200,8 @@ Timeseries.prototype.drawLine=function(data,color){
     
     var that = this;
     this.line = d3.svg.line()
-    .interpolate('step-after') //make it a step function
-    .x(function(d) { return that.x(d.date); })
-    .y(function(d) { return that.y(d.value); }); 
+        .x(function(d) { return that.x(d.date); })
+        .y(function(d) { return that.y(d.value); }); 
     
     //add data
     this.svg.append('path')

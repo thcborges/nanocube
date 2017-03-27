@@ -1,6 +1,5 @@
 L.NanocubeLayer = L.TileLayer.Canvas.extend({
     initialize: function(options){
-        options.async = true;
 	L.TileLayer.Canvas.prototype.initialize.call(this, options);
 	this.model = options.model;
 	this.variable = options.variable;
@@ -12,37 +11,12 @@ L.NanocubeLayer = L.TileLayer.Canvas.extend({
 	this.smooth = false;
 
 	this.show_count = false;
-	this.log = function(x) { return Math.log(x+1); };
-
-        var that=this;
-        this.on('load',function(){
-            console.log('loaded');
-            if (that._normalize){
-                console.log(that.min,that.max);
-                that._normalize = false;
-                that.redraw();
-            }
-        });
-
-        this.renormalize();
+	this.log = true;
     }
 });
 
-L.NanocubeLayer.prototype.trans = function(method){
-    switch(method){
-    case 'raw':
-        this.log = function(x){return x;};
-        break;
-    case 'log':
-        this.log = function(x){return Math.log(x+1);};
-        break;
-    case 'sqrt':
-        this.log = function(x){return Math.sqrt(x);};
-        break;
-    default:
-        this.log = function(x){return Math.log(x);};
-    }
-        
+L.NanocubeLayer.prototype.toggleLog = function(){
+    this.log = !this.log;
     this.redraw();
 };
 
@@ -51,36 +25,15 @@ L.NanocubeLayer.prototype.toggleShowCount = function(){
     this.redraw();
 };
 
-L.NanocubeLayer.prototype.viewInfo = function(){
-    //get the view information
-    var zoom = this._map.getZoom();
-    var bounds = this._map.getBounds();
-    var drill = Math.min(this.variable.maxlevel-zoom,8)-this.coarselevels ;
-
-    var wdist = bounds.getNorthWest().distanceTo(bounds.getNorthEast()); 
-    var hdist = bounds.getNorthWest().distanceTo(bounds.getSouthWest()); 
-
-    var vsize = this._map.getSize();
-    var pwdist = wdist / vsize.x * Math.pow(2,(8-drill));
-    var phdist = hdist / vsize.y * Math.pow(2,(8-drill));
-
-    return 'Viewport: '+ d3.format('.1f')(wdist/1000) + 'km &#215; ' +
-            d3.format('.1f')(hdist/1000) +
-            'km (Bin:'+ d3.format('.1f')(pwdist) + 'm &#215; ' +
-            d3.format('.1f')(phdist)
-            + 'm)';
-};
-    
 
 L.NanocubeLayer.prototype.redraw = function(){
     if (this._map) {
 	//this._reset({hard: false});  //no hard resetting
 	this._update();
     }
-
     for (var i in this._tiles) {
 	this._redrawTile(this._tiles[i]);
-    }   
+    }
     return this;
 };
 
@@ -122,26 +75,15 @@ L.NanocubeLayer.prototype.drawTile = function(canvas, tilePoint, zoom){
 	var result = that.processJSON(json);
 
 	if(result !=null){
-            if(that._normalize){
-	        that.max = Math.max(that.max, result.max);
-	        that.min = Math.min(that.min, result.min);
-            }
-	    else{
-                that.renderTile(canvas,size,tilePoint,zoom,result.data);
-            }
+	    that.max = Math.max(that.max, result.max);
+	    that.min = Math.min(that.min, result.min);
+	    that.renderTile(canvas,size,tilePoint,zoom,result.data);
 	}
 	else{
 	    that.renderTile(canvas,size,tilePoint,zoom,null);
 	}
-
-        /*
-        if(that._tilesToLoad == 1 && that._normalize){
-            that._normalize = false;
-            that.redraw(); //redraw once more
-        }*/
-
-        that.tileDrawn(canvas);    
     });
+    this.tileDrawn(canvas);
 };
 
 L.NanocubeLayer.prototype.renderTile = function(canvas, size, tilePoint,zoom,data){
@@ -164,7 +106,7 @@ L.NanocubeLayer.prototype.renderTile = function(canvas, size, tilePoint,zoom,dat
 
     if (! this.smooth){ //blocky rendering
 	ctx.imageSmoothingEnabled = false;
-	//ctx.webkitImageSmoothingEnabled = false;
+	ctx.webkitImageSmoothingEnabled = false;
 	ctx.mozImageSmoothingEnabled = false;
     }
 
@@ -172,8 +114,10 @@ L.NanocubeLayer.prototype.renderTile = function(canvas, size, tilePoint,zoom,dat
     var that = this;
     var minv = that.min;
     var maxv = that.max;
-    minv = that.log(minv);
-    maxv = that.log(maxv);
+    if (that.log){
+	minv = Math.log(minv+1);
+	maxv = Math.log(maxv+1);
+    }
     minv*=0.9;
 
     data.forEach(function(d){
@@ -182,10 +126,10 @@ L.NanocubeLayer.prototype.renderTile = function(canvas, size, tilePoint,zoom,dat
 	}
 
 	var v = d.v;
-	v = that.log(v);
-        v = Math.min(maxv,v);
-        v = Math.max(minv,v);
-        
+	if (that.log){
+	    v = Math.log(v+1);
+	}
+
 	v = (v-minv)/(maxv-minv);
 
 	//try to parse rgba
@@ -247,6 +191,7 @@ L.NanocubeLayer.prototype.drawGridCount = function(ctx,tilePoint,zoom,data){
     ctx.font="10pt sans-serif";
     ctx.fillStyle="white";
     ctx.fillText(totalstr,10,20);
+
 };
 
 
@@ -256,18 +201,13 @@ L.NanocubeLayer.prototype.processJSON = function(json){
     }
 
     var data = json.root.children.map(function(d){
-	if ('path' in d){
-	    return { x: d.path[0], y: d.path[1], v: d.val };
-	} 
-	else{
-	    return { x: d.x, y: d.y, v: d.val };
-	}
+	return { x: d.x, y: d.y, v: d.val };
     });
 
     var minv = data.reduce(function(prev,curr){
-	return Math.min(prev,curr.v); }, Infinity);
+	return Math.min(prev,curr.v) }, Infinity);
     var maxv = data.reduce(function(prev,curr){
-	return Math.max(prev,curr.v); }, -Infinity);
+	return Math.max(prev,curr.v) }, -Infinity);
 
     return {min:minv,max:maxv,data:data};
 };
@@ -297,7 +237,11 @@ L.NanocubeLayer.prototype.processData = function(bindata){
 	if (rv < 1e-6){ //skip zeros
 	    continue;
 	}
-        
+
+	//if (this.log){
+	//    rv = Math.log(rv+1);
+	//}
+
 	data[i] = {x:rx, y:ry, v: rv};
 	maxv = Math.max(maxv,rv);
 	minv = Math.min(minv,rv);
@@ -310,17 +254,9 @@ L.NanocubeLayer.prototype.processData = function(bindata){
     return {min:minv,max:maxv,data:data};
 };
 
-L.NanocubeLayer.prototype.renormalize = function(){
+
+L.NanocubeLayer.prototype._addTilesFromCenterOut = function (bounds){
     this.max = -Infinity;
     this.min = Infinity;
-    this._normalize = true;
-
-    //try to force refresh
-    try{
-        var map = this._map;
-        map.removeLayer(this);
-        map.addLayer(this);
-    }
-    catch(e){
-    }
+    L.TileLayer.Canvas.prototype._addTilesFromCenterOut.call(this, bounds);
 };

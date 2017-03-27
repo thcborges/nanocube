@@ -7,7 +7,7 @@ function initPage(config){
 	//insert the divs
 	$("#maincontent").prepend("<div id="+ d +"></div>");
 
-	var div = $("#"+d.replace(/\./g,'\\.'));
+	var div = $("#"+d);
 	//set CSS
 	div.css(config.div[d]);
 
@@ -16,13 +16,6 @@ function initPage(config){
 	}
     }
 
-    if ('css' in config){
-	var s = document.styleSheets[document.styleSheets.length-1];
-	config.css.forEach(function(d){
-	    s.insertRule(d,s.cssRules.length);
-	});
-    }    
-    
     $(window).on("resize load orientationchange", function(){
 	contents.forEach(function(div){
 	    //this will not work for multi maps
