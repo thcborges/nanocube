@@ -1,0 +1,2 @@
+http://localhost:29512/count.r("time",interval(138,2118)).a("location",dive(tile2d(527,1286,11),7),"img")
+{ "layers":[ "anchor:location" ], "root":{  } }

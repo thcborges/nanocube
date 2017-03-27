@@ -1,0 +1,2 @@
+http://localhost:29512/count.r("time",mt_interval_sequence(0,524289,8192))
+{ "layers":[ "multi-target:time" ], "root":{ "children":[ { "path":[0], "val":50000 } ] } }
