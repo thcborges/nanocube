@@ -2,6 +2,27 @@
 
 Nanocubes are a fast data structure for in-memory data cubes developed at the [Information Visualization department](http://www.research.att.com/infovis) at [AT&T Labs Research](http://www.research.att.com). Visualizations powered by nanocubes can be used to explore datasets with billions of elements at interactive rates in a web browser, and in some cases nanocubes uses sufficiently little memory that you can run a nanocube in a modern-day laptop.
 
+
+## Restart Nanocube:
+
+```
+export NANOCUBE_SRC=`pwd`
+export NANOCUBE_BIN=$NANOCUBE_SRC/bin
+export PATH=$NANOCUBE_BIN:$PATH
+
+cat $NANOCUBE_SRC/data/crime50k.dmp | nanocube-leaf -q 29512 -f 10000
+
+ncwebviewer-config -s http://localhost:29512 -o $NANOCUBE_SRC/extra/nc_web_viewer/config_crime.json
+
+cd $NANOCUBE_SRC/extra/nc_web_viewer
+python -m SimpleHTTPServer 8000
+
+http://localhost:8000/#config_crime
+
+
+```
+
+
 ## Releases
 
 | Number | Description |
