@@ -204,7 +204,7 @@ Nanocube.prototype.getTbinInfo = function() {
 
     var s = tbininfo[0].value.split('_');
     var offset=new Date(s[0]+'T'+s[1]+'Z'); //construct UTC iso time string
-    
+
     var day=0, hour=0, min=0, sec=0, res=null;
     res = s[2].match(/([0-9]+)m/);
     if (res){
@@ -225,13 +225,13 @@ Nanocube.prototype.getTbinInfo = function() {
 	day = +res[1];
     }
 
-    return {date_offset:offset, 
+    return {date_offset:offset,
 	    bin_to_hour: day*24+hour+min/60.0+sec/3600.0};
 };
 
 Nanocube.prototype.getTimeBound = function(timevar,start,end,func,lastdfd){
     var dfd = lastdfd || $.Deferred();
-    
+
     var q = this.query();
     var len = (end-start);
     var elem = 8192;
@@ -244,11 +244,11 @@ Nanocube.prototype.getTimeBound = function(timevar,start,end,func,lastdfd){
 	if (!json.root.children){
 	    throw new Error("Invalid Range");
 	}
-	
+
 	var bound = json.root.children.reduce(function(prev,curr){
 	    return func(curr.path[0], prev);
 	},json.root.children[0].path[0]);
-	
+
 	if (binsize > 1){
 	    var newstart = start + bound * binsize;
 	    var newend = newstart + binsize;
@@ -274,11 +274,11 @@ Nanocube.prototype.setTimeInfo = function() {
 	that.timeinfo = that.getTbinInfo();
 
 	that.timeinfo.start = minbound;
-	that.timeinfo.end = maxbound;	
+	that.timeinfo.end = maxbound;
 	that.timeinfo.nbins=(that.timeinfo.end-that.timeinfo.start+1);
 	console.log(that.timeinfo);
 	dfd.resolve();
-    });    
+    });
     return dfd.promise();
 };
 

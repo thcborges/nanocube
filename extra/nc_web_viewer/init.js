@@ -3,17 +3,20 @@ function initPage(config){
     $(document).attr('title', config.title);
 
     var contents = [];
+    var i = 0;
+    console.log(config);
     for (var d in config.div){
-	//insert the divs
-	$("#maincontent").prepend("<div id="+ d +"></div>");
+      console.log("teste");
+    	//insert the divs
+    	$("#maincontent").prepend("<div id="+ d +"></div><!--" + i +"-->");
 
-	var div = $("#"+d);
-	//set CSS
-	div.css(config.div[d]);
+    	var div = $("#"+d);
+    	//set CSS
+    	div.css(config.div[d]);
 
-	if(div.height() <  1){
-	    contents.push(div);
-	}
+    	if(div.height() <  1){
+    	    contents.push(div);
+    	}
     }
 
     $(window).on("resize load orientationchange", function(){
